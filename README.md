@@ -1,6 +1,6 @@
 # Claude orchestration patterns
 
-Five small Jupyter notebooks, one per pattern, that call Claude through a [Portkey](https://portkey.ai/docs/integrations/llms/anthropic) gateway. They are made for learning: small cells, a markdown explanation before each step, and logs for every prompt, response, token count and timing.
+Five small Jupyter notebooks, one per pattern, that call Claude through the Anthropic Messages API. They are made for learning: small cells, a markdown explanation before each step, and logs for every prompt, response, token count and timing.
 
 | Notebook | Pattern | Who controls the flow |
 |---|---|---|
@@ -25,15 +25,20 @@ jupyter lab                      # or open the folder in VS Code
 
 ## Configuration
 
-All configuration comes from three variables in `.env` at the repo root. Notebooks find it automatically with `python-dotenv`:
+Configuration lives in `.env` at the repo root, and the notebooks find it automatically with `python-dotenv`. The variable names match the ones used by the Anthropic SDK and Claude Code, so one file can configure both.
 
-| Variable | Example | Purpose |
+| Variable | Required | Purpose |
 |---|---|---|
-| `PORTKEY_BASE_URL` | `https://api.portkey.ai` | Gateway root (no `/v1`; the SDK adds `/v1/messages`) |
-| `PORTKEY_API_KEY` | `pk-...` | Sent as the `x-portkey-api-key` header |
-| `MODEL` | `@anthropic/claude-sonnet-4-5-20250929` | Portkey `@provider-slug/model` name |
+| `ANTHROPIC_BASE_URL` | No (defaults to `https://api.anthropic.com`) | Endpoint root, without `/v1` |
+| `ANTHROPIC_API_KEY` or `ANTHROPIC_AUTH_TOKEN` | One of them | API key for direct access, or bearer token for a gateway |
+| `ANTHROPIC_MODEL` | Yes | Model ID as your endpoint names it |
+| `ANTHROPIC_CUSTOM_HEADERS` | No | Extra headers, one `Name: value` per line |
 
-Every notebook uses the official `anthropic` SDK with `base_url` pointed at Portkey. If cell 0.4 (smoke test) prints `gateway OK`, your configuration works.
+### Using an LLM gateway
+
+Any gateway that exposes the Anthropic Messages API works without code changes. Set `ANTHROPIC_BASE_URL` to the gateway, put its credential in `ANTHROPIC_AUTH_TOKEN`, and use the model ID format the gateway expects. If the gateway requires extra request headers, for routing, tenancy or provider selection, list them in `ANTHROPIC_CUSTOM_HEADERS`. Notebook 05 uses tool use, so the gateway must pass `tools` and `tool_use` blocks through.
+
+If cell 0.4 (smoke test) prints `gateway OK`, your configuration works. Variables already set in your shell take precedence over `.env`.
 
 ## Notes
 
